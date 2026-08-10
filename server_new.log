@@ -1,0 +1,23 @@
+Γùç injected env (19) from .env // tip: Γîÿ override existing { override: true }
+[GitHub Models] Token loaded
+[Groq] API key loaded
+[OpenRouter] API key loaded
+[Cerebras] API key loaded
+[SambaNova] No key set
+[Mistral] No key set
+[Together] No key set
+[NVIDIA NIM] No key set
+  HTTPS: https://192.168.0.62:3443 (mobile mic access)
+[DB] Loaded existing database from disk
+========================================
+  OPENHUB ΓÇö AI Agent Control Center
+  Server: http://localhost:3001
+  WebSocket: ws://localhost:3001
+  Twitch: GhostLegacyX
+  Discord configured: true
+  Database: dashboard.db (SQLite, persisted)
+  Data policy: REAL DATA ONLY
+  Claw3D: http://localhost:3002
+========================================
+[TaskExecutor] Background executor started (polling every 5s)
+[Business] Autonomy engine started

@@ -1,0 +1,18 @@
+2026-08-06T14:06:30.484Z nvidia/nemotron-3-ultra-550b-a55b:free status=200 err=Upstream error from Nvidia: ResourceExhausted: Worker local total request limit reached (32/32)
+2026-08-07T01:10:29.614Z nvidia/nemotron-3-ultra-550b-a55b:free status=200 err=Upstream error from Nvidia: ResourceExhausted: Worker local total request limit reached (64/32)
+2026-08-07T17:10:07.825Z nvidia/nemotron-3-ultra-550b-a55b:free status=200 err=Upstream error from Nvidia: ResourceExhausted: Worker local total request limit reached (33/32)
+2026-08-07T19:10:06.216Z nvidia/nemotron-3-ultra-550b-a55b:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T19:10:06.326Z openrouter/free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T19:10:06.422Z nvidia/nemotron-3-super-120b-a12b:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T19:10:06.487Z google/gemma-4-26b-a4b-it:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T21:10:07.494Z nvidia/nemotron-3-ultra-550b-a55b:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T21:10:07.586Z openrouter/free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T21:10:07.638Z nvidia/nemotron-3-super-120b-a12b:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T21:10:07.701Z google/gemma-4-26b-a4b-it:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T23:10:07.687Z nvidia/nemotron-3-ultra-550b-a55b:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T23:10:07.869Z openrouter/free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T23:10:08.374Z nvidia/nemotron-3-super-120b-a12b:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-07T23:10:08.440Z google/gemma-4-26b-a4b-it:free status=429 err=Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day
+2026-08-08T14:06:57.325Z nvidia/nemotron-3-ultra-550b-a55b:free status=200 err=Upstream error from Nvidia: ResourceExhausted: Worker local total request limit reached (32/32)
+2026-08-09T01:10:40.108Z nvidia/nemotron-3-ultra-550b-a55b:free exception=Invalid response body while trying to fetch https://openrouter.ai/api/v1/chat/completions: read ECONNRESET
+2026-08-09T11:10:09.685Z nvidia/nemotron-3-ultra-550b-a55b:free status=200 err=Upstream error from Nvidia: ResourceExhausted: Worker local total request limit reached (32/32)

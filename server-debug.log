@@ -1,0 +1,24 @@
+◇ injected env (17) from .env // tip: ⌘ suppress logs { quiet: true }
+[GitHub Models] Token loaded
+[DB] Loaded existing database from disk
+========================================
+  OPENHUB — AI Agent Control Center
+  Server: http://localhost:3001
+  WebSocket: ws://localhost:3001
+  Twitch: GhostLegacyX
+  Discord configured: true
+  Database: dashboard.db (SQLite, persisted)
+  Data policy: REAL DATA ONLY
+  Claw3D: http://localhost:3002
+========================================
+[TaskExecutor] Background executor started (polling every 10s)
+[Business] Autonomy engine started
+[TaskExecutor] Picking up task #145 "Write a kinky and taboo story about a mom (you) who has become sexually attracted to me (the son) . Be very graphic and detailed when it comes to describing us hesitantly becoming intamate because you cant control your intense urges and feelings about me. Start the story with you (mommy) quietly creeping into my room at 3am while im fast asleep, and you cant hold back any longer, your cravings for me have become over" (priority: critical)
+[TaskExecutor] Starting task #145: "Write a kinky and taboo story about a mom (you) who has become sexually attracted to me (the son) . Be very graphic and detailed when it comes to describing us hesitantly becoming intamate because you cant control your intense urges and feelings about me. Start the story with you (mommy) quietly creeping into my room at 3am while im fast asleep, and you cant hold back any longer, your cravings for me have become over"
+[TaskExecutor] GitHub token available: true (gho_f2tN...)
+[TaskExecutor] GitHub Models error: 400 {"error":{"message":"The response was filtered due to the prompt triggering Azure OpenAI's content management policy. Please modify your prompt and retry. To learn more about our content filtering policies please read our documentation: https://go.microsoft.com/fwlink/?linkid=2198766","type":null,"p
+[TaskExecutor] OpenRouter google/gemini-2.0-flash-lite-001 error: 401
+[TaskExecutor] OpenRouter meta-llama/llama-4-maverick:free error: 401
+[TaskExecutor] OpenRouter deepseek/deepseek-chat-v3-0324:free error: 401
+[TaskExecutor] Using built-in local engine
+[TaskExecutor] Task #145 completed — 623 chars

@@ -1,0 +1,7 @@
+⚠ Turbopack's filesystem cache has been deleted because we previously detected an internal error in Turbopack. Builds or page loads may be slower as a result.
+React does not recognize the `whileHover` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `whilehover` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+React does not recognize the `whileTap` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `whiletap` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+[browser] React does not recognize the `whileHover` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `whilehover` instead. If you accidentally passed it from a parent component, remove it from the DOM element. 
+[browser] React does not recognize the `whileTap` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `whiletap` instead. If you accidentally passed it from a parent component, remove it from the DOM element. 
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+^C

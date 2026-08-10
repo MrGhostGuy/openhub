@@ -1,0 +1,25 @@
+Γùç injected env (17) from .env // tip: Γîü auth for agents [www.vestauth.com]
+(node:4108) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[DB] Loaded existing database from disk
+========================================
+  OPENHUB ΓÇö AI Agent Control Center
+  Server: http://localhost:3001
+  WebSocket: ws://localhost:3001
+  Twitch: GhostLegacyX
+  Discord configured: true
+  Database: dashboard.db (SQLite, persisted)
+  Data policy: REAL DATA ONLY
+  Claw3D: http://localhost:3002
+========================================
+[Business] Autonomy engine started
+[AI Chat] Stored AI reply, calling processTaskIntent...
+[TaskIntent] Starting with reply: Creating task: Test Task
+[TaskIntent] hasTaskIntent: true
+[TaskIntent] Getting agents...
+[TaskIntent] Got agents: 26
+[TaskIntent] Creating task: Creating task: Test Task assignee: Mistral
+[TaskIntent] Task created with ID: 95
+[TaskIntent] Auto-created task #95 "Creating task: Test Task" ΓåÆ Mistral (medium)
+[AI Chat] processTaskIntent returned: true
+[AI Chat] Sending success response

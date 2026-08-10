@@ -1,0 +1,24 @@
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.62:3000
+✓ Ready in 1351ms
+
+○ Compiling /monetize ...
+ GET /monetize 200 in 8.6s (next.js: 7.8s, application-code: 805ms)
+○ Compiling /chat ...
+ GET /chat 200 in 5.1s (next.js: 4.9s, application-code: 151ms)
+○ Compiling /voice ...
+ GET /voice 200 in 9.3s (next.js: 9.0s, application-code: 294ms)
+ GET /voice 200 in 129ms (next.js: 20ms, application-code: 110ms)
+ GET /voice 200 in 125ms (next.js: 26ms, application-code: 99ms)
+ GET /voice 200 in 392ms (next.js: 15ms, application-code: 377ms)
+ GET /voice 200 in 633ms (next.js: 247ms, application-code: 386ms)
+ GET /voice 200 in 130ms (next.js: 27ms, application-code: 104ms)
+○ Compiling /tasks ...
+ GET /tasks 200 in 11.9s (next.js: 10.7s, application-code: 1252ms)
+ GET /tasks 200 in 293ms (next.js: 80ms, application-code: 213ms)
+✓ Finished writing to filesystem cache in 10.8s
+○ Compiling /taskboard ...
+ GET /taskboard 200 in 4.3s (next.js: 4.0s, application-code: 299ms)
+ GET /taskboard 200 in 147ms (next.js: 35ms, application-code: 112ms)
+ GET /chat 200 in 440ms (next.js: 200ms, application-code: 240ms)

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenHub — AI Agent Control Center</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a12; color: #e0e0e0; overflow-x: hidden; }
+    .header { background: #1a1a2e; padding: 12px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #2a2a4a; }
+    .header h1 { font-size: 18px; font-weight: 600; color: #00d4ff; }
+    .header .subtitle { font-size: 12px; color: #888; margin-left: auto; }
+    .tabs { display: flex; background: #1a1a2e; border-bottom: 2px solid #2a2a4a; }
+    .tab { padding: 12px 20px; cursor: pointer; font-size: 13px; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s; }
+    .tab:hover { background: #22223a; }
+    .tab.active { border-bottom-color: #00d4ff; color: #00d4ff; }
+    .tab-inactive { color: #888; }
+    .tab-content { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 8px; padding: 16px; transition: transform 0.2s; }
+    .card:hover { transform: translateY(-2px); border-color: #00d4ff; }
+    .card img { width: 100%; height: 140px; object-fit: contain; background: #000; border-radius: 4px; margin-bottom: 12px; }
+    .card h3 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+    .card p { font-size: 11px; color: #888; margin-bottom: 8px; line-height: 1.4; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .badge-active { background: #064e3b; color: #34d399; }
+    .badge-building { background: #7c2d12; color: #fb923c; }
+    .badge-idle { background: #3730a3; color: #a78bfa; }
+    .agent-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .agent-pill { background: #0f0f1e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 6px 12px; font-size: 11px; display: flex; align-items: center; gap: 6px; }
+    .agent-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .dot-active { background: #34d399; }
+    .dot-working { background: #fb923c; }
+    .dot-idle { background: #6b7280; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 8px; padding: 16px; text-align: center; }
+    .stat .num { font-size: 24px; font-weight: 700; color: #00d4ff; }
+    .stat .label { font-size: 11px; color: #888; margin-top: 4px; }
+    .qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .qr-card { background: #000; border: 1px solid #2a2a4a; border-radius: 8px; padding: 12px; text-align: center; }
+    .qr-card img { width: 120px; height: 120px; object-fit: contain; margin: 0 auto 8px; }
+    .qr-card .name { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+    .qr-card .url { font-size: 9px; color: #888; word-break: break-all; }
+    .actions { display: flex; gap: 8px; margin-bottom: 16px; }
+    .btn { padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; }
+    .btn-primary { background: #00d4ff; color: #000; }
+    .btn-secondary { background: #1a1a2e; border: 1px solid #2a2a4a; color: #e0e0e0; }
+    .chat-container { height: 400px; overflow-y: auto; background: #0f0f1e; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .chat-msg { margin-bottom: 12px; }
+    .chat-msg .sender { font-size: 11px; font-weight: 600; color: #00d4ff; }
+    .chat-msg .text { font-size: 13px; color: #e0e0e0; margin-top: 2px; }
+    .chat-input { display: flex; gap: 8px; }
+    .chat-input input { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #2a2a4a; background: #1a1a2e; color: #e0e0e0; font-size: 13px; }
+    .chat-input button { padding: 8px 16px; border-radius: 6px; border: none; background: #00d4ff; color: #000; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .iframe-wrap { border: 1px solid #2a2a4a; border-radius: 8px; overflow: hidden; height: 500px; }
+    .iframe-wrap iframe { width: 100%; height: 100%; border: none; }
+    .section-title { font-size: 14px; font-weight: 600; color: #00d4ff; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>OpenHub</h1>
+    <span class="subtitle">AI Agent Control Center</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
+    <div class="tab" onclick="showTab('r1')">R1 Apps</div>
+    <div class="tab" onclick="showTab('agents')">Agents</div>
+    <div class="tab" onclick="showTab('chat')">Chat with Boobot Prime</div>
+    <div class="tab" onclick="showTab('mobile')">Mobile App</div>
+  </div>
+
+  <div class="tab-content active" id="dashboard">
+    <div class="section-title">Overview</div>
+    <div class="stats" id="stats"></div>
+    <div class="section-title">Recent Activity</div>
+    <div id="activity"></div>
+  </div>
+
+  <div class="tab-content" id="r1">
+    <div class="section-title">Rabbit R1 Creations</div>
+    <div class="qr-grid" id="r1-projects"></div>
+  </div>
+
+  <div class="tab-content" id="agents">
+    <div class="section-title">Active Agents</div>
+    <div class="agent-list" id="agent-list"></div>
+  </div>
+
+  <div class="tab-content" id="chat">
+    <div class="chat-container" id="chat-messages"></div>
+    <div class="chat-input">
+      <input type="text" id="chat-input" placeholder="Message Boobot Prime..." onkeypress="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+
+  <div class="tab-content" id="mobile">
+    <div class="iframe-wrap">
+      <iframe src="/m" title="OpenHub Mobile"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const R1_PROJECTS = [
+      { name: "OpenHub Mobile R1", url: "http://192.168.0.62:3001/m", qr: "/images/r1/openhub-mobile-r1.png", desc: "Full 8-tab mobile control center for R1" },
+      { name: "2D Minecraft R1", url: "https://mrgosthguy.github.io/r1-minecraft/", qr: "/images/r1/2d-minecraft-r1.png", desc: "Classic 2D Minecraft on your R1" },
+      { name: "Ghost Tap Groove R1", url: "https://mrgosthguy.github.io/ghost-tap-groove/", qr: "/images/r1/ghost-tap-groove-r1.png", desc: "Rhythm game for R1" },
+      { name: "GhostBuilder R1", url: "https://mrgosthguy.github.io/ghostbuilder/", qr: "/images/r1/ghostbuilder-r1.png", desc: "Ghost companion builder" },
+      { name: "Ghost Companions", url: "https://mrgosthguy.github.io/ghost-companions/", qr: "/images/r1/ghost-companions-r1.png", desc: "AI companion apps" },
+      { name: "Social Dashboard R1", url: "https://mrgosthguy.github.io/social-dashboard/", qr: "/images/r1/social-dashboard-r1.png", desc: "Social media dashboard" },
+      { name: "Xbox Game Clips R1", url: "https://mrgosthguy.github.io/xbox-clips/", qr: "/images/r1/xbox-game-clips-r1.png", desc: "Xbox game clips viewer" },
+      { name: "Buckshot Roulette R1", url: "https://mrgosthguy.github.io/buckshot-roulette/", qr: "/images/r1/buckshot-roulette-r1.png", desc: "Buckshot Roulette game" },
+      { name: "DOOM by GLX R1", url: "https://mrgosthguy.github.io/doom-glx/", qr: "/images/r1/doom-glx-r1.png", desc: "DOOM ported to R1" }
+    ];
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      event.target.classList.add('active');
+      if (tab === 'dashboard') loadDashboard();
+      if (tab === 'r1') loadR1();
+      if (tab === 'agents') loadAgents();
+    }
+
+    async function loadDashboard() {
+      try {
+        const [statsRes, activityRes] = await Promise.all([
+          fetch('/api/stats').then(r => r.json()),
+          fetch('/api/tasks').then(r => r.json())
+        ]);
+        const stats = statsRes;
+        const tasks = activityRes.tasks || [];
+        document.getElementById('stats').innerHTML = `
+          <div class="stat"><div class="num">${stats.totalAgents || 0}</div><div class="label">Agents</div></div>
+          <div class="stat"><div class="num">${stats.totalTasks || 0}</div><div class="label">Tasks</div></div>
+          <div class="stat"><div class="num">${stats.completedTasks || 0}</div><div class="label">Completed</div></div>
+          <div class="stat"><div class="num">${stats.inProgressTasks || 0}</div><div class="label">In Progress</div></div>
+        `;
+        document.getElementById('activity').innerHTML = tasks.slice(0, 5).map(t => `
+          <div class="card"><h3>#${t.id} ${t.title}</h3><p>${t.status} • ${t.assignee || 'unassigned'}</p></div>
+        `).join('') || '<div class="card">No recent activity</div>';
+      } catch(e) { console.error(e); }
+    }
+
+    function loadR1() {
+      document.getElementById('r1-projects').innerHTML = R1_PROJECTS.map(p => `
+        <div class="qr-card">
+          <img src="${p.qr}" alt="${p.name} QR">
+          <div class="name">${p.name}</div>
+          <div class="url">${p.url}</div>
+          <p>${p.desc}</p>
+        </div>
+      `).join('');
+    }
+
+    async function loadAgents() {
+      try {
+        const res = await fetch('/api/agents');
+        const data = await res.json();
+        const agents = data.agents || [];
+        document.getElementById('agent-list').innerHTML = agents.map(a => {
+          const statusClass = a.status === 'active' ? 'dot-active' : a.status === 'working' ? 'dot-working' : 'dot-idle';
+          const badgeClass = a.status === 'active' ? 'badge-active' : a.status === 'working' ? 'badge-building' : 'badge-idle';
+          return `<div class="agent-pill"><span class="agent-dot ${statusClass}"></span>${a.name} <span class="badge ${badgeClass}">${a.status}</span></div>`;
+        }).join('');
+      } catch(e) { console.error(e); }
+    }
+
+    async function sendChat() {
+      const input = document.getElementById('chat-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+      const messages = document.getElementById('chat-messages');
+      messages.innerHTML += `<div class="chat-msg"><div class="sender">You</div><div class="text">${msg}</div></div>`;
+      input.value = '';
+      messages.scrollTop = messages.scrollHeight;
+      try {
+        const res = await fetch('/api/chat/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, sender: 'Ghost' })
+        });
+        const data = await res.json();
+        messages.innerHTML += `<div class="chat-msg"><div class="sender">Boobot Prime</div><div class="text">${data.reply || data.message || 'No response'}</div></div>`;
+        messages.scrollTop = messages.scrollHeight;
+      } catch(e) {
+        messages.innerHTML += `<div class="chat-msg"><div class="sender">Boobot Prime</div><div class="text">Error: ${e.message}</div></div>`;
+        messages.scrollTop = messages.scrollHeight;
+      }
+    }
+
+    loadDashboard();
+    loadR1();
+    loadAgents();
+  </script>
+</body>
+</html>

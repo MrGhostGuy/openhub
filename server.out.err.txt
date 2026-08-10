@@ -1,0 +1,61 @@
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[TaskExecutor] Cerebras error: 402 {"message":"Payment required to access this resource. Visit your billing tab.","type":"payment_required_error","param":"quota","code":"payment_require
+[TaskExecutor] OpenRouter Dolphin error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Hermes error: 401 {"error":{"message":"User not found.","code":401}}
+[TaskExecutor] OpenRouter Llama error: 401 {"error":{"message":"User not found.","code":401}}
+[AI Chat] Anthropic key invalid, falling back
+[AI Chat] Anthropic key invalid, falling back

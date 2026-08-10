@@ -1,0 +1,21 @@
+{
+  "name": "openhub",
+  "version": "2.0.0",
+  "description": "Openhub - AI Agent Control Center with real-time task management",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.3.1",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0",
+    "sql.js": "^1.10.0",
+    "ws": "^8.16.0"
+  },
+  "author": "Openhub",
+  "license": "MIT"
+}

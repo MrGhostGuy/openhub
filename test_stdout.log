@@ -1,0 +1,13 @@
+◇ injected env (18) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+[DB] Loaded existing database from disk
+========================================
+  OPENHUB — AI Agent Control Center
+  Server: http://localhost:3001
+  WebSocket: ws://localhost:3001
+  Twitch: GhostLegacyX
+  Discord configured: true
+  Database: dashboard.db (SQLite, persisted)
+  Data policy: REAL DATA ONLY
+  Claw3D: http://localhost:3002
+========================================
+[Business] Autonomy engine started
