@@ -184,19 +184,46 @@
     }
 
     function autoImprove(name) {
-      setImproveStatus('Queued "' + name + '" for auto-improvement. Ask an agent: "auto-improve ' + name + '"');
+      setImproveStatus('Running audit on "' + name + '"…');
+      runAutoImproveFor(name);
     }
 
     function runAutoImprove() {
       const v = document.getElementById('improve-repo').value.trim();
       if (!v) { setImproveStatus('Enter a repo or folder first.'); return; }
-      setImproveStatus('Queued "' + v + '". Ask an agent: "auto-improve ' + v + '"');
+      setImproveStatus('Running audit on "' + v + '"…');
+      runAutoImproveFor(v);
     }
 
-    function setImproveStatus(msg) {
+    async function runAutoImproveFor(target) {
+      try {
+        const res = await fetch('/api/autoimprove/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target })
+        });
+        const data = await res.json();
+        if (!res.ok) { setImproveStatus(data.message || 'Audit failed.', true); return; }
+        const s = data.summary;
+        const lines = [
+          'Audited ' + s.target + ' (' + s.repo + ')',
+          '• ' + s.jsFiles + ' JS files · ' + s.syntaxErrors + ' syntax errors · ' + s.deadSymbols + ' unread symbols',
+          '• live build: ' + (s.liveOk ? 'OK' : 'stale/broken — needs a re-push'),
+          'Actions queued:'
+        ];
+        s.order.forEach((o, i) => lines.push('  ' + (i + 1) + '. ' + o));
+        setImproveStatus(lines.join('\n'));
+        loadAgents();
+      } catch (e) {
+        setImproveStatus('Could not reach the server: ' + e.message, true);
+      }
+    }
+
+    function setImproveStatus(msg, isError) {
       const el = document.getElementById('improve-status');
       el.textContent = msg;
-      el.style.color = '#00d4ff';
+      el.style.color = isError ? '#ff6b6b' : '#00d4ff';
+      el.style.whiteSpace = 'pre-line';
     }
 
     async function loadDashboard() {

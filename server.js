@@ -48,6 +48,7 @@ const incomeAgent = require('./income-agent');
 const moneyHustler = require('./money-hustler');
 const trafficAgent = require('./traffic-agent');
 const r1Builder = require('./r1-builder-agent');
+const autoImprove = require('./auto-improve-agent');
 
 // ---- Auto-scheduler for the monetization automation (fires 1-2x/day) ----
 // Checks every 60s; if a configured HH:MM has passed today and we haven't
@@ -2755,6 +2756,18 @@ db.initDatabase().then(() => {
       r1Builder.cycle();
     });
 
+    // === Auto-Improver (game audit + improve agent) ===
+    app.get('/api/autoimprove/status', (req, res) => {
+      const agent = db.getAgentsLive().find(a => a.name === autoImprove.NAME);
+      res.json({ success: true, status: autoImprove.getStatus(), agent: agent || null });
+    });
+    app.post('/api/autoimprove/run', async (req, res) => {
+      const target = (req.body && (req.body.target || req.body.repo || req.body.name)) || '';
+      const result = await autoImprove.cycle(target);
+      if (!result.ok) return res.status(409).json({ success: false, message: result.why || 'audit already running' });
+      res.json({ success: true, message: `Audited ${result.summary.target} — ${result.summary.findings} finding(s), ${result.summary.order.length} action(s) queued`, summary: result.summary });
+    });
+
     // One-shot: research top-selling trending products then push 10 designs to Printify→Shopify
     app.post('/api/pod/topsellers', (req, res) => {
       res.json({ success: true, message: 'Trending top-seller product drop triggered (research + 10 designs)' });
@@ -3003,6 +3016,7 @@ function startTaskExecutor() {
     try { moneyHustler.start(); } catch (e) { console.error('[Hustler] start failed:', e.message); }
     try { trafficAgent.start(); } catch (e) { console.error('[Traffic] start failed:', e.message); }
     try { r1Builder.start(); } catch (e) { console.error('[R1Builder] start failed:', e.message); }
+    try { autoImprove.start(); } catch (e) { console.error('[AutoImprove] start failed:', e.message); }
     try { startMonetizationScheduler(runFullAutomation); } catch (e) { console.error('[Scheduler] start failed:', e.message); }
   });
 }).catch(err => {
