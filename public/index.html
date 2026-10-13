@@ -70,6 +70,7 @@
     <div class="tab" onclick="showTab('agents')">Agents</div>
     <div class="tab" onclick="showTab('chat')">Chat with Boobot Prime</div>
     <div class="tab" onclick="showTab('mobile')">Mobile App</div>
+    <div class="tab" onclick="showTab('improve')">Auto-Improvements</div>
   </div>
 
   <div class="tab-content active" id="dashboard">
@@ -103,6 +104,40 @@
     </div>
   </div>
 
+  <div class="tab-content" id="improve">
+    <div class="section-title">Game Auto-Improvements</div>
+    <div class="card" style="margin-bottom:16px">
+      <h3>What this does</h3>
+      <p>Point an agent at one of your games and it will audit it for real defects, fix
+      them, add mechanics that make it feel like the original, prove every claim with
+      tests, and push a live build. Try: <b>"auto-improve minimon"</b>.</p>
+    </div>
+
+    <div class="section-title">Your games</div>
+    <div id="improve-list"></div>
+
+    <div class="section-title" style="margin-top:20px">Run on any repo</div>
+    <div class="card">
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="improve-repo" placeholder="github.com/owner/repo or a local folder"
+               style="flex:1;padding:9px 12px;border-radius:6px;background:#0f0f1e;
+                      border:1px solid #2a2a4a;color:#e0e0e0;font-size:13px">
+        <button class="btn btn-primary" onclick="runAutoImprove()">Run</button>
+      </div>
+      <p id="improve-status" style="margin-top:10px;color:#888;font-size:12px"></p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>How the agent works</h3>
+      <p><b>1. Verify</b> live deploy for console errors; every reachable screen must actually render.<br>
+      <b>2. Audit</b> for features the code claims but never wires up — that is where the real bugs hide.<br>
+      <b>3. Fix</b> in impact order: crashes, soft-locks, broken persistence, exploits.<br>
+      <b>4. Add</b> authentic mechanics so it plays like the original.<br>
+      <b>5. Prove</b> with unit tests against real data plus a live browser run.<br>
+      <b>6. Ship</b> and report honestly, including what was <i>not</i> fixed.</p>
+    </div>
+  </div>
+
   <script>
     const R1_PROJECTS = [
       { name: "OpenHub Mobile R1", url: "http://192.168.0.62:3001/m", qr: "/images/r1/openhub-mobile-r1.png", desc: "Full 8-tab mobile control center for R1" },
@@ -124,6 +159,44 @@
       if (tab === 'dashboard') loadDashboard();
       if (tab === 'r1') loadR1();
       if (tab === 'agents') loadAgents();
+      if (tab === 'improve') loadImprove();
+    }
+
+    const IMPROVE_TARGETS = [
+      { name: "Minimon R1", repo: "MrGhostGuy/minimon-r1", live: "https://mrghostguy.github.io/minimon-r1/", kind: "creature-collector RPG" },
+      { name: "8 Ball Pool", repo: "MrGhostGuy/eight-ball-pool", live: "https://mrghostguy.github.io/eight-ball-pool/", kind: "pool vs CPU" },
+      { name: "Zoo-muh", repo: "MrGhostGuy/zoo-muh", live: "https://mrghostguy.github.io/zoo-muh/", kind: "marble shooter" },
+      { name: "Super Shooter R1", repo: "MrGhostGuy/super-shooter-r1", live: "", kind: "shooter" },
+      { name: "Trick Shot R1", repo: "MrGhostGuy/trickshot-r1", live: "", kind: "trick shot" }
+    ];
+
+    function loadImprove() {
+      document.getElementById('improve-list').innerHTML = IMPROVE_TARGETS.map(g => `
+        <div class="card" style="display:flex;gap:14px;align-items:center;margin-bottom:10px">
+          <div style="flex:1">
+            <h3 style="margin:0">${g.name}</h3>
+            <p style="margin:4px 0 0">${g.kind} · <code>${g.repo}</code>${
+              g.live ? ' · <a href="' + g.live + '" target="_blank" style="color:#00d4ff">live</a>' : ''}</p>
+          </div>
+          <button class="btn btn-primary" onclick="autoImprove('${g.name}')">Improve</button>
+        </div>
+      `).join('');
+    }
+
+    function autoImprove(name) {
+      setImproveStatus('Queued "' + name + '" for auto-improvement. Ask an agent: "auto-improve ' + name + '"');
+    }
+
+    function runAutoImprove() {
+      const v = document.getElementById('improve-repo').value.trim();
+      if (!v) { setImproveStatus('Enter a repo or folder first.'); return; }
+      setImproveStatus('Queued "' + v + '". Ask an agent: "auto-improve ' + v + '"');
+    }
+
+    function setImproveStatus(msg) {
+      const el = document.getElementById('improve-status');
+      el.textContent = msg;
+      el.style.color = '#00d4ff';
     }
 
     async function loadDashboard() {
