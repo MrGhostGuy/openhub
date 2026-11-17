@@ -275,8 +275,16 @@ function getAgent(name) {
   return obj;
 }
 function updateAgent(name, fields) {
-  const sets = Object.keys(fields).map(k => `${k} = ?`).join(', ');
-  const vals = [...Object.values(fields), name];
+  // Whitelist columns: field names are interpolated into the SQL string, so
+  // unvalidated keys from a PATCH body would allow SQL injection via column
+  // names. All known callers (server routes, business-engine) only ever set
+  // AGENT_ALLOWED fields. Also guards the empty-fields case, which previously
+  // produced invalid SQL ("SET , updated_at = ...").
+  const safe = {};
+  for (const k of Object.keys(fields || {})) { if (AGENT_ALLOWED.includes(k)) safe[k] = fields[k]; }
+  if (!Object.keys(safe).length) return;
+  const sets = Object.keys(safe).map(k => `${k} = ?`).join(', ');
+  const vals = [...Object.values(safe), name];
   db.run(`UPDATE agents SET ${sets}, updated_at = datetime('now') WHERE name = ?`, vals);
   persist();
 }
@@ -422,7 +430,9 @@ function getLatestDailyPlan(limit = 20) {
 
 // === Task Operations ===
 function getTasks() {
-  const rows = db.exec("SELECT * FROM tasks ORDER BY created_at DESC");
+  // id DESC tiebreak: created_at has 1-second resolution, so tasks created in
+  // the same second previously came back in an unstable order.
+  const rows = db.exec("SELECT * FROM tasks ORDER BY created_at DESC, id DESC");
   if (!rows.length) return [];
   const cols = rows[0].columns;
   return rows[0].values.map(row => { const obj = {}; cols.forEach((c, i) => obj[c] = row[i]); return obj; });
@@ -536,8 +546,10 @@ function updatePipelineRun(id, status, duration, log) {
 }
 
 // === Chat Messages ===
-function getChatMessages(limit = 100) {
-  const rows = db.exec("SELECT * FROM chat_messages ORDER BY timestamp DESC LIMIT ?", [limit]);
+function getChatMessages(limit = 100, offset = 0) {
+  // offset was accepted by callers (/api/memory/chat pagination) but silently
+  // ignored — every page returned the same first page. Now honored.
+  const rows = db.exec("SELECT * FROM chat_messages ORDER BY timestamp DESC, id DESC LIMIT ? OFFSET ?", [limit, offset || 0]);
   if (!rows.length) return [];
   const cols = rows[0].columns;
   return rows[0].values.map(row => { const obj = {}; cols.forEach((c, i) => obj[c] = row[i]); return obj; }).reverse();
@@ -615,9 +627,15 @@ function insertProject(p) {
   const rows = db.exec("SELECT MAX(id) as id FROM projects");
   return rows[0]?.values?.[0]?.[0] || 0;
 }
+const PROJECT_ALLOWED = ['name', 'description', 'status', 'category', 'repo_url', 'live_url', 'notes', 'last_worked_at'];
 function updateProject(id, fields) {
-  const sets = Object.keys(fields).map(k => `${k} = ?`).join(', ');
-  const vals = [...Object.values(fields), id];
+  // Whitelist for the same reason as updateAgent: keys are interpolated into
+  // SQL, and an empty patch previously generated invalid SQL.
+  const safe = {};
+  for (const k of Object.keys(fields || {})) { if (PROJECT_ALLOWED.includes(k)) safe[k] = fields[k]; }
+  if (!Object.keys(safe).length) return;
+  const sets = Object.keys(safe).map(k => `${k} = ?`).join(', ');
+  const vals = [...Object.values(safe), id];
   db.run(`UPDATE projects SET ${sets}, updated_at = datetime('now') WHERE id = ?`, vals);
   persist();
 }
@@ -640,7 +658,12 @@ function getPinnedTasks() {
   return rows[0].values.map(row => { const obj = {}; cols.forEach((c, i) => obj[c] = row[i]); return obj; });
 }
 function pinTask(taskId, reason) {
-  db.run(`INSERT OR REPLACE INTO pinned_tasks (task_id, reason) VALUES (?, ?)`, [taskId, reason || '']);
+  // pinned_tasks has no UNIQUE constraint on task_id, so INSERT OR REPLACE
+  // never actually replaced — pinning the same task twice created duplicate
+  // rows, duplicating it in getPinnedTasks() and inflating stats.pinnedCount.
+  // Delete-then-insert makes pinning idempotent without a schema change.
+  db.run(`DELETE FROM pinned_tasks WHERE task_id = ?`, [taskId]);
+  db.run(`INSERT INTO pinned_tasks (task_id, reason) VALUES (?, ?)`, [taskId, reason || '']);
   persist();
 }
 function unpinTask(taskId) {
@@ -743,7 +766,7 @@ function computeStats() {
 function getNotifications(limit = 20, unreadOnly = false) {
   let query = 'SELECT * FROM notifications';
   if (unreadOnly) query += ' WHERE read = 0';
-  query += ' ORDER BY created_at DESC LIMIT ?';
+  query += ' ORDER BY created_at DESC, id DESC LIMIT ?';
   const rows = db.exec(query, [limit]);
   if (!rows.length) return [];
   const cols = rows[0].columns;
@@ -794,9 +817,14 @@ function insertBusiness(b) {
   const rows = db.exec("SELECT MAX(id) as id FROM businesses");
   return rows[0]?.values?.[0]?.[0] || 0;
 }
+const BUSINESS_ALLOWED = ['name', 'prompt', 'niche', 'status', 'revenue', 'expenses', 'customers', 'sessions', 'conversion_rate', 'plan', 'owner'];
 function updateBusiness(id, fields) {
-  const sets = Object.keys(fields).map(k => `${k} = ?`).join(', ');
-  const vals = [...Object.values(fields), id];
+  // Whitelist for the same reason as updateAgent (interpolated column names).
+  const safe = {};
+  for (const k of Object.keys(fields || {})) { if (BUSINESS_ALLOWED.includes(k)) safe[k] = fields[k]; }
+  if (!Object.keys(safe).length) return;
+  const sets = Object.keys(safe).map(k => `${k} = ?`).join(', ');
+  const vals = [...Object.values(safe), id];
   db.run(`UPDATE businesses SET ${sets}, updated_at = datetime('now') WHERE id = ?`, vals);
   persist();
 }
