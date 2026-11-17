@@ -367,7 +367,11 @@ function getSystemMetrics() {
 function broadcast(data) {
   const msg = JSON.stringify(data);
   wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) client.send(msg);
+    if (client.readyState === WebSocket.OPEN) {
+      // One dead/racing socket must not throw and break the broadcast loop
+      // for every other client (or the route handler that triggered it).
+      try { client.send(msg); } catch (e) { /* socket already gone */ }
+    }
   });
   // Also broadcast to Claw3D if connected
   broadcastToClaw3D(data);
@@ -394,7 +398,9 @@ function broadcastToClaw3D(data) {
       timestamp: new Date().toISOString()
     });
     claw3dClients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) client.send(claw3dMsg);
+      if (client.readyState === WebSocket.OPEN) {
+        try { client.send(claw3dMsg); } catch (e) { /* socket already gone */ }
+      }
     });
   }
 }
@@ -721,6 +727,15 @@ app.patch('/api/tasks/:id', (req, res) => {
 app.post('/api/tasks/:id/complete', (req, res) => {
   const id = parseInt(req.params.id);
   const { result, result_files, agent_name } = req.body;
+  // Guards: previously, completing a nonexistent task still wrote logs and
+  // pipeline runs for it, and completing an already-completed task a second
+  // time incremented the agent's tasks_completed AGAIN and duplicated the
+  // deliverable + pipeline rows — silently inflating the trackers.
+  const existing = db.getTask(id);
+  if (!existing) return res.json({ success: false, error: 'Task not found' });
+  if (existing.status === 'completed') {
+    return res.json({ success: true, message: `Task #${id} was already completed`, alreadyCompleted: true });
+  }
   db.completeTask(id, result, result_files);
   db.addTaskLog(id, agent_name || 'System', 'Task completed', result || 'Task marked as complete');
   if (agent_name) {
@@ -1019,6 +1034,34 @@ app.get('/api/trending', async (req, res) => {
 });
 
 // === BooBot Prime — Advanced Local AI Engine ===
+// Shared task-creation helper used by the local AI engine (research intent).
+// This function was CALLED by generateLocalAIResponse() but never defined —
+// any chat message that hit the research intent on the local engine (i.e.
+// whenever no LLM API key is configured) threw "ReferenceError: createTask
+// is not defined" and the whole /api/chat/ai request failed. It mirrors the
+// bookkeeping processTaskIntent() does: task row, logs, pipeline, comms,
+// agent status, and the WS broadcasts the dashboard listens for.
+function createTask(title, description, assignee, priority) {
+  const taskId = db.insertTask({
+    title,
+    description: description || '',
+    assignee: assignee || 'Boobot Prime',
+    priority: priority || 'medium',
+    stage: 'queued',
+    status: 'pending',
+    progress: 0
+  });
+  db.addTaskLog(taskId, 'Boobot Prime', 'Task created from chat', `Assigned to ${assignee || 'Boobot Prime'}`);
+  db.addPipelineRun(taskId, 'Source', 'done', 'Task created from chat conversation');
+  db.addPipelineRun(taskId, 'Build', 'running', `${assignee || 'Boobot Prime'} is working on this task`);
+  db.addCommunication('Boobot Prime', assignee || 'Boobot Prime', `New task #${taskId}: ${title}`, taskId);
+  const agent = db.getAgent(assignee || 'Boobot Prime');
+  if (agent) db.updateAgent(assignee || 'Boobot Prime', { status: 'working', current_task: title });
+  broadcast({ type: 'task_created', task: { id: taskId, title, assignee: assignee || 'Boobot Prime', status: 'pending', priority: priority || 'medium', stage: 'queued', progress: 0 } });
+  broadcast({ type: 'pipeline_update', task: taskId, stage: 'Build', status: 'running' });
+  return taskId;
+}
+
 const boobotMemory = { conversations: {}, facts: {}, mood: 'friendly', context: {} };
 
 function generateLocalAIResponse(message, sender, agents, tasks) {
@@ -1688,12 +1731,17 @@ async function processTaskIntent(aiReply, userSender) {
   // Find the last user message (not from Boobot Prime or System).
   const chatHistory = db.getChatMessages(20);
   const userMessages = chatHistory.filter(m => m.sender !== 'Boobot Prime' && m.sender !== 'System');
+  // NOTE: db.getChatMessages() fetches newest-first but REVERSES before
+  // returning, so the array is chronological — the latest user message is
+  // the LAST element. (Verified empirically; do not "fix" this to [0].)
   const lastUserMsg = userMessages.length ? userMessages[userMessages.length - 1].message : '';
   const lastUserLower = lastUserMsg.toLowerCase().trim();
 
   const explicitTaskPatterns = [
-    /^create\s+a?\s+task[:\s]/i,
-    /^make\s+a?\s+task[:\s]/i,
+    // (a\s+)? — the original a?\s+ required TWO spaces in "create task:",
+    // so the documented trigger "create task: …" never matched.
+    /^create\s+(a\s+)?task[:\s]/i,
+    /^make\s+(a\s+)?task[:\s]/i,
     /^new\s+task[:\s]/i,
     /^task[:\s]/i,
     /^assign\s+task[:\s]/i,
@@ -1737,7 +1785,15 @@ async function processTaskIntent(aiReply, userSender) {
     priority = 'low';
   }
 
-  let title = (aiReply || '').split(/[.!?\n]/)[0].trim();
+  // Title: prefer the words the user themselves put after "task:" / "task to"
+  // in their own message ("create task: overhaul test" -> "overhaul test").
+  // The old behavior took the first sentence of the AI's reply, which on the
+  // local engine is a canned personality line — tasks ended up titled things
+  // like "Heh Ghost, I'm locked in" instead of what Jeff actually asked for.
+  let title = '';
+  const userTitleMatch = lastUserMsg.match(/task(?:\s+to)?\s*[:\-]\s*(.+)/i) || lastUserMsg.match(/^(?:i need you to|i want you to)\s+(.+)/i);
+  if (userTitleMatch) title = userTitleMatch[1].trim();
+  if (title.length < 5) title = (aiReply || '').split(/[.!?\n]/)[0].trim();
   if (title.length > 80) title = title.substring(0, 77) + '...';
   if (title.length < 5) title = 'Task from chat request';
 
@@ -1783,15 +1839,13 @@ async function processTaskIntent(aiReply, userSender) {
 }
 
 // === Activity Log ===
-app.get('/api/activity', (req, res) => {
-  const limit = parseInt(req.query.limit) || 100;
-  const category = req.query.category || null;
-  if (category) {
-    const activities = db.getActivityLog(limit).filter(a => a.category === category);
-    return res.json({ success: true, activities });
-  }
-  res.json({ success: true, activities: db.getActivityLog(limit) });
-});
+// NOTE (overhaul): a second `app.get('/api/activity', ...)` used to be
+// registered here, returning { activities } instead of { logs }. Express
+// always served the FIRST registration (near the top of the API routes,
+// which supports ?category= filtering in SQL and returns { success, logs }),
+// so this handler was unreachable dead code with a conflicting response
+// shape. Removed; the canonical GET /api/activity is the first one. The
+// mobile app already tolerates the { logs } shape (j.logs || j.activities).
 
 app.post('/api/activity', (req, res) => {
   const { agent_name, action, detail, category } = req.body;
@@ -2139,43 +2193,15 @@ app.get('/api/memory/search', (req, res) => {
   } catch (e) { res.json({ success: false, error: e.message, results: [] }); }
 });
 
-// === Deliverables ==
+// === Deliverables (file-backed, by id) ==
+// NOTE (overhaul): file-based POST /api/deliverables and GET /api/deliverables
+// handlers used to be registered here, but Express always served the
+// DB-backed registrations earlier in this file (addDeliverable /
+// getAllDeliverables), so both were unreachable dead code with a conflicting
+// storage model. Removed. The DB-backed routes are canonical; the file-based
+// GET /api/deliverables/:id below was and remains reachable (no earlier
+// /:id registration), so it is kept as-is.
 const DELIVERABLES_DIR = path.join(__dirname, 'deliverables');
-
-// Save a deliverable
-app.post('/api/deliverables', express.json(), (req, res) => {
-  try {
-    if (!fs.existsSync(DELIVERABLES_DIR)) fs.mkdirSync(DELIVERABLES_DIR, { recursive: true });
-    const { id, title, category, content, source, tags, status } = req.body;
-    const deliverable = {
-      id: id || Date.now().toString(),
-      title: title || 'Untitled',
-      category: category || 'general',
-      content: content || '',
-      source: source || 'cron',
-      tags: tags || [],
-      status: status || 'completed',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    const filePath = path.join(DELIVERABLES_DIR, `${deliverable.id}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(deliverable, null, 2));
-    res.json({ success: true, deliverable });
-  } catch (e) { res.json({ success: false, error: e.message }); }
-});
-
-// List deliverables
-app.get('/api/deliverables', (req, res) => {
-  try {
-    if (!fs.existsSync(DELIVERABLES_DIR)) return res.json({ success: true, deliverables: [] });
-    const files = fs.readdirSync(DELIVERABLES_DIR).filter(f => f.endsWith('.json'));
-    const deliverables = files.map(f => {
-      const data = JSON.parse(fs.readFileSync(path.join(DELIVERABLES_DIR, f), 'utf8'));
-      return data;
-    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    res.json({ success: true, deliverables });
-  } catch (e) { res.json({ success: false, error: e.message, deliverables: [] }); }
-});
 
 // Get specific deliverable
 app.get('/api/deliverables/:id', (req, res) => {
@@ -2234,7 +2260,11 @@ app.get('/api/analytics', (req, res) => {
     const completed = agentTasks.filter(t => t.status === 'completed').length;
     const inProgress = agentTasks.filter(t => t.status === 'in-progress').length;
     const pending = agentTasks.filter(t => t.status === 'pending').length;
-    return { name: a.name, avatar: a.avatar, role: a.role, total: agentTasks.length, completed, inProgress, pending, xp: a.xp || 0, level: a.level || 1 };
+    // XP/level live in agent_evolution, not on the agents row — reading
+    // a.xp/a.level here always yielded 0/1, so analytics XP totals were
+    // permanently wrong. Pull from the evolution table like /api/agents does.
+    const evo = db.getEvolution(a.name);
+    return { name: a.name, avatar: a.avatar, role: a.role, total: agentTasks.length, completed, inProgress, pending, xp: evo ? (evo.xp || 0) : 0, level: evo ? (evo.level || 1) : 1 };
   });
   
   // Priority breakdown
@@ -2245,9 +2275,12 @@ app.get('/api/analytics', (req, res) => {
   const statuses = { pending: 0, 'in-progress': 0, completed: 0, failed: 0 };
   tasks.forEach(t => { if (statuses[t.status] !== undefined) statuses[t.status]++; });
   
-  // XP totals
-  const totalXP = agents.reduce((sum, a) => sum + (a.xp || 0), 0);
-  const avgLevel = agents.length ? Math.round(agents.reduce((sum, a) => sum + (a.level || 1), 0) / agents.length) : 0;
+  // XP totals (from agent_evolution — the agents table has no xp/level columns)
+  const evolutions = db.getEvolutions();
+  const evoByName = {};
+  evolutions.forEach(e => { evoByName[e.agent_name] = e; });
+  const totalXP = agents.reduce((sum, a) => sum + ((evoByName[a.name] && evoByName[a.name].xp) || 0), 0);
+  const avgLevel = agents.length ? Math.round(agents.reduce((sum, a) => sum + ((evoByName[a.name] && evoByName[a.name].level) || 1), 0) / agents.length) : 0;
   
   // Activity frequency (last 7 days)
   const activityFreq = [];
@@ -2884,6 +2917,15 @@ db.initDatabase().then(() => {
          if (result) {
            // Update task with result
            db.updateTask(taskId, { status: 'completed', progress: 100, stage: 'done', result: result });
+           // Tracker accuracy: the /api/tasks/:id/complete route increments
+           // the assignee's tasks_completed, but this executor path did not —
+           // so agent completion counts silently under-reported every task
+           // the background executor finished. Mirror the route's behavior.
+           const execAgentName = task.assignee || 'Boobot Prime';
+           const execAgent = db.getAgent(execAgentName);
+           if (execAgent) {
+             db.updateAgent(execAgentName, { tasks_completed: (execAgent.tasks_completed || 0) + 1, current_task: '' });
+           }
            db.addTaskLog(taskId, task.assignee || 'Boobot Prime', 'Task completed', `Generated ${result.length} characters of output`);
            broadcast({ type: 'task_updated', task: { id: taskId, status: 'completed', progress: 100, stage: 'done', result } });
 
